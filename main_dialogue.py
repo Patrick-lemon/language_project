@@ -7,9 +7,14 @@ from dialogue_focus import (
 from learner_model import LearnerModel
 from memory import Memory
 from planner import Planner
-from skills import CorrectionSkill, ExplainSkill, PracticeSkill, ReviewSkill
 from tools.llm import describe_runtime_mode
 from tools.progress import format_scenario_progress
+from tools.tutor_actions import (
+    build_practice_prompt,
+    correct_answer,
+    explain_topic,
+    review_topic,
+)
 
 
 def run_tutoring_session() -> None:
@@ -39,10 +44,6 @@ What do you want to prioritize today?
 
     memory = Memory()
     planner = Planner()
-    explain_skill = ExplainSkill()
-    practice_skill = PracticeSkill()
-    correction_skill = CorrectionSkill()
-    review_skill = ReviewSkill()
 
     while True:
         learner_snapshot = learner.snapshot()
@@ -56,7 +57,7 @@ What do you want to prioritize today?
         print(f"Reason: {plan.reason}")
 
         if plan.action in {"explain", "review"}:
-            message = explain_skill.run(plan.topic, learner_snapshot, recent_events)
+            message = explain_topic(plan.topic, learner_snapshot, recent_events)
             print(message)
             memory.remember(
                 {"type": "instruction", "topic": plan.topic, "content": message}
@@ -77,7 +78,7 @@ What do you want to prioritize today?
             if user_signal == "q":
                 break
 
-        prompt_text = practice_skill.build_prompt(plan.topic, learner_snapshot, recent_events)
+        prompt_text = build_practice_prompt(plan.topic, learner_snapshot, recent_events)
         print(f"\n[PracticeSkill] {prompt_text}")
         while True:
             answer = input("Your answer (q=quit, menu=change focus): ").strip()
@@ -90,7 +91,7 @@ What do you want to prioritize today?
         if answer.lower() == "q":
             break
 
-        is_correct, correction_message = correction_skill.run(
+        is_correct, correction_message = correct_answer(
             plan.topic,
             answer,
             learner_snapshot,
@@ -102,7 +103,7 @@ What do you want to prioritize today?
         memory.update_topic_result(plan.topic, is_correct)
         learner.add_vocabulary_item(answer)
 
-        review_message = review_skill.run(learner, memory, plan.topic)
+        review_message = review_topic(learner, memory, plan.topic)
         print(review_message)
 
         memory.mark_task_completed(f"{plan.action}:{plan.topic}")

@@ -4,8 +4,8 @@ This project implements a minimum viable tutoring agent framework aligned to the
 
 - `learner_model.py`: structured learner profile, competence map, and review queue
 - `planner.py`: rule-based planner choosing explicit tutoring actions
-- `skills/`: `ExplainSkill`, `PracticeSkill`, `CorrectionSkill`, `ReviewSkill`
-- `tools/`: `llm.py` and `grammar.py` as explicit tool-layer modules
+- `skill/SKILL.md`: markdown skill definition for tutor behavior
+- `tools/`: tool-layer modules for LLM calls, grammar checks, skill loading, and tutoring actions
 - `memory.py`: interaction history + task tracking + topic accuracy
 - `main_dialogue.py`: interactive loop that connects everything
 
@@ -49,7 +49,7 @@ The loop demonstrates:
 
 1. Read learner state
 2. Generate a plan
-3. Execute skills (and call tool layer through skills)
+3. Execute tutor actions from `tools/` guided by `skill/SKILL.md`
 4. Update learner model and memory
 
 ## Option 1: LLM-backed tutor (recommended next step)
