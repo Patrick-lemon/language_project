@@ -7,9 +7,33 @@ This project implements a minimum viable tutoring agent framework aligned to the
 - `skill/SKILL.md`: markdown skill definition for tutor behavior
 - `tools/`: tool-layer modules for LLM calls, grammar checks, skill loading, and tutoring actions
 - `memory.py`: interaction history + task tracking + topic accuracy
+- `runtime_support.py`: cross-platform `.env` loading and terminal output setup
+- `session_store.py`: learner progress persistence across runs
 - `main_dialogue.py`: interactive loop that connects everything
+- `tests/`: regression tests for planning, persistence, and runtime-safe output
 
-## Run (offline / no API)
+## Run In The Browser (recommended)
+
+```bash
+cd "/Users/patrickstar/Documents/LanguageProject"
+python3 web_app.py
+```
+
+Then open `http://127.0.0.1:8765` in Chrome or Edge.
+
+On Windows you can also double-click `start_voice_tutor.bat`.
+
+The browser app is now the main experience:
+
+- voice-first lesson flow instead of terminal prompts
+- browser speech recognition for learner replies
+- browser text-to-speech for the teacher voice
+- lesson board showing the current target line, stage, focus, and review state
+- the same saved learner progress under `state/<learner>.json`
+
+`web_app.py` and `main_dialogue.py` both load `.env` automatically if the file exists, so the direct Python entry point works on macOS, Linux, and Windows.
+
+## Run In The Terminal (legacy)
 
 ```bash
 cd "/Users/patrickstar/Documents/LanguageProject"
@@ -28,18 +52,15 @@ cp .env.example .env
 # Edit .env: set TUTOR_LLM_ENABLED=1 and your key
 ```
 
-3. Start the tutor (loads `.env` automatically):
+3. Start the tutor:
 
 ```bash
-./run_tutor.sh
+python3 web_app.py
 ```
 
-Or set variables manually for one session:
+Or, if you still want the old command-line flow:
 
 ```bash
-export TUTOR_LLM_ENABLED=1
-export TUTOR_LLM_API_KEY="your-key-here"
-export TUTOR_LLM_MODEL="gpt-4o-mini"
 python3 main_dialogue.py
 ```
 
@@ -51,6 +72,21 @@ The loop demonstrates:
 2. Generate a plan
 3. Execute tutor actions from `tools/` guided by `skill/SKILL.md`
 4. Update learner model and memory
+
+## Persistence and Review Flow
+
+- Learner state and session memory are now saved under `state/<learner>.json`.
+- Re-entering the same learner name resumes progress automatically.
+- Wrong answers now trigger an immediate review pass before the system falls back to the broader review queue.
+- Only correct answers are added to the learner's known vocabulary set.
+
+## Browser Voice Tutor
+
+- `voice_tutor.py`: lesson engine for browser-based speaking rounds
+- `web_app.py`: local HTTP server for the browser UI and session APIs
+- `web/`: static HTML, CSS, and JavaScript for the voice-first interface
+- each lesson uses a two-step speaking loop: guided production, then a more natural repeat
+- topic progression still follows the learner model, planner, review queue, and scenario gating
 
 ## Option 1: LLM-backed tutor (recommended next step)
 
@@ -113,7 +149,7 @@ You are **not** interrupted before every lesson. To change focus or topics, type
 - the **continue** prompt after an explanation, or  
 - the **practice answer** prompt  
 
-That opens a small focus REPL (`focus …`, `topics …`, `list`, etc.). Press Enter on an empty `focus>` line to return.
+That opens a small focus REPL (`focus ...`, `topics ...`, `list`, etc.). Press Enter on an empty `focus>` line to return.
 
 The planner still prioritizes **review queue** and **recent mistakes** so you do not get stuck ignoring weak areas.
 
@@ -123,7 +159,7 @@ Use this when you need a **custom** component (not just API calls):
 
 | Goal | Typical approach |
 |------|------------------|
-| Better “next exercise” or difficulty | Tabular learner features → classifier / small neural net; planner reads predicted label |
+| Better "next exercise" or difficulty | Tabular learner features -> classifier / small neural net; planner reads predicted label |
 | Open-ended answer grading | Fine-tune a small LM on (prompt, student answer, score/rubric) pairs |
 | Dialogue policy | Offline RL or supervised learning from logged (state, action, outcome) |
 

@@ -52,18 +52,9 @@ class Planner:
         )
 
     def choose_plan(self, learner: LearnerModel, memory: Memory) -> Plan:
-        if learner.review_queue:
-            topic = learner.review_queue[0]
-            return Plan(
-                action="review",
-                topic=topic,
-                reason="Topic is in the learner's review queue.",
-            )
-
         topics = list_topics()
 
-        # Adaptation: if the learner just got something wrong, we may re-explain
-        # the same topic before moving on.
+        # Immediate remediation takes priority over the broader review queue.
         last_attempt = memory.last_practice_attempt()
         if last_attempt and not bool(last_attempt.get("correct")):
             last_topic = last_attempt.get("topic")
@@ -72,11 +63,11 @@ class Planner:
                 last_mastery = learner.get_mastery(last_topic)
                 if last_mastery < 0.65 and len(attempts) < 3:
                     return Plan(
-                        action="explain",
+                        action="review",
                         topic=last_topic,
                         reason=(
                             "Learner struggled recently on this topic; "
-                            "re-explaining before another practice attempt."
+                            "review it before another practice attempt."
                         ),
                     )
                 return Plan(
@@ -84,6 +75,15 @@ class Planner:
                     topic=last_topic,
                     reason="Learner made an error; practice this topic again.",
                 )
+
+        if learner.review_queue:
+            topic = learner.review_queue[0]
+            accuracy = memory.topic_accuracy(topic)
+            return Plan(
+                action="review",
+                topic=topic,
+                reason=f"Topic stays in the learner's review queue (accuracy={accuracy:.2f}).",
+            )
 
         # Adaptation: avoid repeating very recent topics and avoid repeating the same
         # content category back-to-back when possible.
@@ -103,7 +103,9 @@ class Planner:
             if t not in recent_topics and topic_category(t) not in recent_categories
         ]
         if not candidates:
-            candidates = [t for t in unlocked_topics if t not in recent_topics] or unlocked_topics
+            candidates = [
+                t for t in unlocked_topics if t not in recent_topics
+            ] or unlocked_topics
 
         candidates, focus_note = self._apply_learner_focus(learner, candidates)
 

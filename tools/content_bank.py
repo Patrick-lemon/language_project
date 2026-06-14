@@ -31,17 +31,18 @@ CONTENT_BANK: dict[str, dict[str, object]] = {
     "cantonese_how_are_you": {
         "category": "survival",
         "explanation": (
-            "To ask 'How are you?' in a neutral way, you can say '你好嗎' (nei5 hou2 maa3). "
-            "It’s essentially 'Hello, are you well?'"
+            "To ask 'How are you?' in a neutral way, you can say '你好嗎？' (nei5 hou2 maa3). "
+            "It's essentially 'Hello, are you well?'"
         ),
         "question": (
             "Practice: Type 'How are you?' in Cantonese. "
-            "Answer with Jyutping (nei5 hou2 maa3) or Traditional characters (你好嗎)."
+            "Answer with Jyutping (nei5 hou2 maa3) or Traditional characters (你好嗎？)."
         ),
         "answers": [
             "nei5 hou2 maa3",
             "neih hou2 maa3",
             "nei hou2 maa3",
+            "你好嗎？",
             "你好嗎",
         ],
     },
@@ -65,7 +66,7 @@ CONTENT_BANK: dict[str, dict[str, object]] = {
         "category": "survival",
         "explanation": (
             "A polite word 'please' in Cantonese is '請' (cing2). "
-            "It’s commonly used in everyday requests."
+            "It's commonly used in everyday requests."
         ),
         "question": (
             "Practice: Type 'please' in Cantonese. "
@@ -77,7 +78,7 @@ CONTENT_BANK: dict[str, dict[str, object]] = {
         "category": "survival",
         "explanation": (
             "A common 'excuse me' / 'sorry' style phrase is '唔該' (m4 goi1). "
-            "It’s used to get attention politely."
+            "It's used to get attention politely."
         ),
         "question": (
             "Practice: Type 'excuse me' in Cantonese. "
@@ -89,7 +90,7 @@ CONTENT_BANK: dict[str, dict[str, object]] = {
         "category": "survival",
         "explanation": (
             "A standard 'sorry / excuse me' is '對唔住' (deoi3 m4 zyu6). "
-            "It’s more explicitly apologizing."
+            "It's more explicitly apologizing."
         ),
         "question": (
             "Practice: Type 'sorry' in Cantonese. "
@@ -126,7 +127,7 @@ CONTENT_BANK: dict[str, dict[str, object]] = {
     "cantonese_i_need": {
         "category": "survival",
         "explanation": (
-            "A useful phrase 'I need ...' is '我需要 ...' (ngo5 seoi1 jiu3 ...). "
+            "A useful phrase 'I need ...' is '我需要...' (ngo5 seoi1 jiu3 ...). "
             "For this exercise we practice the fixed prefix."
         ),
         "question": (
@@ -137,13 +138,10 @@ CONTENT_BANK: dict[str, dict[str, object]] = {
     },
     "cantonese_goodbye": {
         "category": "survival",
-        "explanation": (
-            "A common way to say goodbye is '再見' (zoi6 gin3)."
-        ),
+        "explanation": "A common way to say goodbye is '再見' (zoi6 gin3).",
         "question": "Practice: Type 'goodbye' in Cantonese. (再見)",
         "answers": ["zoi6 gin3", "zoi6gin3", "再見"],
     },
-
     "cantonese_where_is_bathroom": {
         "category": "scenario",
         "prerequisites": [
@@ -151,7 +149,7 @@ CONTENT_BANK: dict[str, dict[str, object]] = {
             "cantonese_i_need",
         ],
         "explanation": (
-            "To ask where the bathroom is, a natural pattern is '洗手間係邊度' "
+            "To ask where the bathroom is, a natural pattern is '洗手間係邊度？' "
             "(sai2 sau2 gaan1 hai6 bin1 dou6)."
         ),
         "question": (
@@ -162,14 +160,14 @@ CONTENT_BANK: dict[str, dict[str, object]] = {
             "sai2 sau2 gaan1 hai6 bin1 dou6",
             "sai2 sau2 gaan1 hai6 bindou6",
             "sai2 sau2 gaan1 bin1 dou6",
+            "洗手間係邊度？",
             "洗手間係邊度",
-            "洗手間喺邊度",
         ],
     },
     "cantonese_how_much": {
         "category": "question",
         "explanation": (
-            "To ask the price, '幾多錢' (gei2 do1 cin2) is a common question."
+            "To ask the price, '幾多錢？' (gei2 do1 cin2) is a common question."
         ),
         "question": (
             "Question: Type 'How much is it?' in Cantonese. "
@@ -178,6 +176,7 @@ CONTENT_BANK: dict[str, dict[str, object]] = {
         "answers": [
             "gei2 do1 cin2",
             "gei2do1cin2",
+            "幾多錢？",
             "幾多錢",
         ],
     },
@@ -206,7 +205,7 @@ CONTENT_BANK: dict[str, dict[str, object]] = {
             "cantonese_thank_you",
         ],
         "explanation": (
-            "A simple cafe order pattern: '我要一杯咖啡' (ngo5 jiu3 jat1 bui1 kaa1 fi1)."
+            "A simple cafe order pattern: '我要一杯咖啡。' (ngo5 jiu3 jat1 bui1 kaa1 fei1)."
         ),
         "question": (
             "Scenario: At a cafe, order 'I want a cup of coffee' in Cantonese. "
@@ -216,6 +215,7 @@ CONTENT_BANK: dict[str, dict[str, object]] = {
             "ngo5 jiu3 jat1 bui1 kaa1 fei1",
             "ngo5jiu3 jat1bui1 kaa1fei1",
             "我要一杯咖啡",
+            "我要一杯咖啡。",
         ],
     },
 }

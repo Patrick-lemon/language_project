@@ -3,3 +3,5 @@
 __pycache__/
 *.pyc
 .venv/
+state/
+tests/__pycache__/

@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Voice Tutor</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="backdrop backdrop-a"></div>
+    <div class="backdrop backdrop-b"></div>
+    <main class="app-shell">
+      <section class="hero-card">
+        <p class="eyebrow">Voice-First Cantonese Tutor</p>
+        <h1>Talk to a tutor, with the transcript on screen.</h1>
+        <p class="hero-copy">
+          The tutor still follows its own lesson system, but now it teaches by speaking first,
+          modeling the line, and then talking with you in a browser conversation.
+        </p>
+        <div class="status-row">
+          <span id="runtimeBadge" class="badge muted">Loading runtime...</span>
+          <span id="speechBadge" class="badge muted">Checking speech support...</span>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <aside class="sidebar">
+          <div class="panel">
+            <h2>Start Session</h2>
+            <label class="field">
+              <span>Learner Name</span>
+              <input id="learnerName" type="text" value="Student" autocomplete="off">
+            </label>
+            <label class="field">
+              <span>Focus Mode</span>
+              <select id="focusMode"></select>
+            </label>
+            <label class="field" id="customTopicsField">
+              <span>Custom Topics</span>
+              <textarea id="customTopics" rows="3" placeholder="cantonese_where,cantonese_i_need"></textarea>
+            </label>
+            <button id="startButton" class="primary-button">Start Conversation</button>
+            <p class="hint">Use the same learner name to resume saved progress.</p>
+          </div>
+
+          <div class="panel">
+            <h2>Lesson Board</h2>
+            <div class="lesson-meta">
+              <div>
+                <p class="meta-label">Current Topic</p>
+                <p id="topicLabel" class="meta-value">Not started</p>
+              </div>
+              <div>
+                <p class="meta-label">Flow</p>
+                <p id="stageLabel" class="meta-value">-</p>
+              </div>
+            </div>
+            <div class="target-card">
+              <p class="meta-label">Spoken Line</p>
+              <p id="targetCharacters" class="target-characters">-</p>
+              <p id="targetRomanization" class="target-romanization">-</p>
+              <p id="targetEnglish" class="target-english">-</p>
+              <p id="supportTip" class="target-support">-</p>
+              <div id="quickReplies" class="quick-replies"></div>
+            </div>
+            <div class="lesson-meta compact">
+              <div>
+                <p class="meta-label">Focus</p>
+                <p id="focusLabel" class="meta-value">-</p>
+              </div>
+              <div>
+                <p class="meta-label">Confidence</p>
+                <p id="confidenceLabel" class="meta-value">-</p>
+              </div>
+            </div>
+            <div>
+              <p class="meta-label">Review Queue</p>
+              <p id="reviewQueue" class="meta-note">-</p>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h2>Voice Setup</h2>
+            <label class="field">
+              <span>Speech Recognition</span>
+              <select id="speechLocale"></select>
+            </label>
+            <label class="toggle">
+              <input id="autoSpeak" type="checkbox" checked>
+              <span>Auto-play teacher voice</span>
+            </label>
+            <div class="utility-controls" aria-hidden="true">
+              <button id="readyButton" class="primary-button" disabled>Show Demo Again</button>
+              <button id="replayButton" class="ghost-button">Replay Teacher</button>
+              <button id="updateFocusButton" class="secondary-button">Apply Current Focus</button>
+              <button id="nextLessonButton" class="ghost-button" disabled>Next Lesson</button>
+            </div>
+            <p class="hint">Speak naturally. If you want the tutor to model it again, just say "repeat again". If you want to move on, say "next lesson".</p>
+          </div>
+        </aside>
+
+        <section class="conversation-panel">
+          <div id="transcript" class="transcript"></div>
+
+          <div class="composer">
+            <button id="recordButton" class="record-button" type="button">Start Speaking</button>
+            <div class="composer-inputs">
+              <textarea id="messageInput" rows="2" placeholder="Reply by voice, or type here if the mic misses you..."></textarea>
+              <div class="composer-actions">
+                <button id="sendButton" class="primary-button" type="button">Reply</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <template id="messageTemplate">
+      <article class="message">
+        <div class="message-role"></div>
+        <div class="message-body"></div>
+      </article>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>

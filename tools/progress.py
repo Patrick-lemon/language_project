@@ -18,11 +18,13 @@ def format_scenario_progress(learner: LearnerModel) -> str:
     if not scenario_topics:
         return "Scenario progress: (no scenario topics in content bank)"
 
-    lines: list[str] = [f"Scenario progress (unlock at mastery ≥ {threshold:.2f} on each prerequisite):"]
+    lines: list[str] = [
+        f"Scenario progress (unlock at mastery >= {threshold:.2f} on each prerequisite):"
+    ]
     for topic in scenario_topics:
         prereqs = topic_prerequisites(topic)
         if not prereqs:
-            lines.append(f"  • {topic}: UNLOCKED (no prerequisites)")
+            lines.append(f"  - {topic}: UNLOCKED (no prerequisites)")
             continue
         missing: list[str] = []
         for p in prereqs:
@@ -30,7 +32,7 @@ def format_scenario_progress(learner: LearnerModel) -> str:
             if m < threshold:
                 missing.append(f"{p}={m:.2f}")
         if not missing:
-            lines.append(f"  • {topic}: UNLOCKED")
+            lines.append(f"  - {topic}: UNLOCKED")
         else:
-            lines.append(f"  • {topic}: LOCKED — raise: {', '.join(missing)}")
+            lines.append(f"  - {topic}: LOCKED - raise: {', '.join(missing)}")
     return "\n".join(lines)

@@ -5,7 +5,6 @@ from memory import Memory
 from tools.content_bank import CONTENT_BANK
 from tools.grammar import check_answer
 from tools.llm import evaluate_answer, generate_explanation, generate_practice_prompt
-from tools.skill_loader import get_skill_section
 
 
 def explain_topic(
@@ -32,6 +31,29 @@ def build_practice_prompt(
     )
 
 
+def review_topic_intro(
+    topic: str,
+    learner: LearnerModel,
+    memory: Memory,
+    learner_snapshot: dict[str, object] | None = None,
+    recent_events: list[dict[str, object]] | None = None,
+) -> str:
+    base = CONTENT_BANK[topic]["explanation"]
+    recap = generate_explanation(topic, base, learner_snapshot, recent_events)
+    recent_attempts = memory.topic_history.get(topic, [])[-3:]
+    recent_summary = ", ".join(
+        "correct" if item else "incorrect" for item in recent_attempts
+    ) or "no graded attempts yet"
+    return (
+        f"[ReviewSkill] Topic: {topic}\n"
+        f"Quick review before retrying. "
+        f"mastery={learner.get_mastery(topic):.2f}, "
+        f"accuracy={memory.topic_accuracy(topic):.2f}, "
+        f"recent={recent_summary}.\n"
+        f"{recap}"
+    )
+
+
 def correct_answer(
     topic: str,
     learner_answer: str,
@@ -54,8 +76,7 @@ def correct_answer(
     return is_correct, f"[CorrectionSkill] {grammar_message} {feedback}"
 
 
-def review_topic(learner: LearnerModel, memory: Memory, topic: str) -> str:
-    _ = get_skill_section("review skill")
+def update_review_status(learner: LearnerModel, memory: Memory, topic: str) -> str:
     accuracy = memory.topic_accuracy(topic)
     if accuracy < 0.7:
         learner.add_to_review(topic)

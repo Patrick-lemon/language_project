@@ -13,9 +13,9 @@ VALID_FOCUS_MODES = ("balanced", "survival", "question", "scenario", "custom")
 
 def print_topic_catalog() -> None:
     topics = list_topics()
-    print("\nAvailable topics (id → category):")
+    print("\nAvailable topics (id -> category):")
     for t in topics:
-        print(f"  • {t}  [{topic_category(t)}]")
+        print(f"  - {t}  [{topic_category(t)}]")
     print()
 
 
@@ -108,7 +108,7 @@ def run_focus_menu(learner: LearnerModel) -> None:
 
 def focus_summary(learner: LearnerModel) -> str:
     if learner.learning_focus == "custom" and learner.custom_focus_topics:
-        return f"custom → {', '.join(learner.custom_focus_topics)}"
+        return f"custom -> {', '.join(learner.custom_focus_topics)}"
     if learner.learning_focus == "custom":
-        return "custom (no topics yet — use `topics id1,id2`)"
+        return "custom (no topics yet - use `topics id1,id2`)"
     return learner.learning_focus

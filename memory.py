@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Any, Optional
 
 
 @dataclass
@@ -45,3 +45,48 @@ class Memory:
             if isinstance(topic, str):
                 topics.append(topic)
         return topics
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "interaction_log": list(self.interaction_log),
+            "topic_history": {
+                topic: [bool(item) for item in attempts]
+                for topic, attempts in self.topic_history.items()
+            },
+            "completed_tasks": list(self.completed_tasks),
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Memory":
+        if not isinstance(data, dict):
+            return cls()
+
+        interaction_log: list[dict[str, object]] = []
+        raw_log = data.get("interaction_log")
+        if isinstance(raw_log, list):
+            for item in raw_log:
+                if isinstance(item, dict):
+                    interaction_log.append(dict(item))
+
+        topic_history: dict[str, list[bool]] = {}
+        raw_history = data.get("topic_history")
+        if isinstance(raw_history, dict):
+            for raw_topic, raw_attempts in raw_history.items():
+                topic = str(raw_topic).strip()
+                if not topic or not isinstance(raw_attempts, list):
+                    continue
+                topic_history[topic] = [bool(item) for item in raw_attempts]
+
+        completed_tasks: list[str] = []
+        raw_tasks = data.get("completed_tasks")
+        if isinstance(raw_tasks, list):
+            for item in raw_tasks:
+                task = str(item).strip()
+                if task:
+                    completed_tasks.append(task)
+
+        return cls(
+            interaction_log=interaction_log,
+            topic_history=topic_history,
+            completed_tasks=completed_tasks,
+        )

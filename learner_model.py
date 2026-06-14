@@ -1,4 +1,40 @@
 from dataclasses import dataclass, field
+from typing import Any
+
+
+def _string_list(value: object) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    items: list[str] = []
+    for raw in value:
+        text = str(raw).strip()
+        if text and text not in items:
+            items.append(text)
+    return items
+
+
+def _float_map(value: object) -> dict[str, float]:
+    if not isinstance(value, dict):
+        return {}
+    out: dict[str, float] = {}
+    for raw_key, raw_score in value.items():
+        key = str(raw_key).strip()
+        if not key:
+            continue
+        try:
+            score = float(raw_score)
+        except (TypeError, ValueError):
+            continue
+        out[key] = max(0.0, min(1.0, score))
+    return out
+
+
+def _bounded_float(value: object, default: float) -> float:
+    try:
+        score = float(value)
+    except (TypeError, ValueError):
+        return default
+    return max(0.0, min(1.0, score))
 
 
 @dataclass
@@ -44,6 +80,44 @@ class LearnerModel:
     def add_to_review(self, topic: str) -> None:
         if topic not in self.review_queue:
             self.review_queue.append(topic)
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "name": self.name,
+            "level": self.level,
+            "target_language": self.target_language,
+            "preferred_mode": self.preferred_mode,
+            "active_goals": list(self.active_goals),
+            "confidence": self.confidence,
+            "mastery_by_topic": dict(self.mastery_by_topic),
+            "known_vocabulary": sorted(self.known_vocabulary),
+            "weak_grammar_points": sorted(self.weak_grammar_points),
+            "recent_errors": list(self.recent_errors),
+            "review_queue": list(self.review_queue),
+            "learning_focus": self.learning_focus,
+            "custom_focus_topics": list(self.custom_focus_topics),
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "LearnerModel":
+        if not isinstance(data, dict):
+            return cls(name="Student")
+
+        return cls(
+            name=str(data.get("name") or "Student"),
+            level=str(data.get("level") or "A2"),
+            target_language=str(data.get("target_language") or "Cantonese"),
+            preferred_mode=str(data.get("preferred_mode") or "guided"),
+            active_goals=_string_list(data.get("active_goals")) or ["daily conversation"],
+            confidence=_bounded_float(data.get("confidence"), 0.5),
+            mastery_by_topic=_float_map(data.get("mastery_by_topic")),
+            known_vocabulary=set(_string_list(data.get("known_vocabulary"))),
+            weak_grammar_points=set(_string_list(data.get("weak_grammar_points"))),
+            recent_errors=_string_list(data.get("recent_errors")),
+            review_queue=_string_list(data.get("review_queue")),
+            learning_focus=str(data.get("learning_focus") or "balanced"),
+            custom_focus_topics=_string_list(data.get("custom_focus_topics")),
+        )
 
     def snapshot(self) -> dict[str, object]:
         return {
