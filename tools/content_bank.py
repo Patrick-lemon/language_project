@@ -9,6 +9,89 @@ Each topic provides:
 
 # Minimum mastery on each prerequisite before scenario topics can be selected by the planner.
 SCENARIO_PREREQUISITE_MASTERY = 0.55
+PREREQUISITE_MASTERY = 0.55
+
+# Lightweight curriculum metadata used by the planner. Keeping this separate from
+# the lesson text makes it easier to tune sequencing without rewriting prompts.
+CURRICULUM_METADATA: dict[str, dict[str, object]] = {
+    "cantonese_greetings": {"difficulty": 1, "tags": ["basics", "greeting"]},
+    "cantonese_how_are_you": {"difficulty": 1, "tags": ["basics", "greeting"]},
+    "cantonese_thank_you": {"difficulty": 1, "tags": ["basics", "politeness"]},
+    "cantonese_please": {"difficulty": 1, "tags": ["basics", "politeness"]},
+    "cantonese_excuse_me": {"difficulty": 1, "tags": ["basics", "politeness"]},
+    "cantonese_sorry": {"difficulty": 1, "tags": ["basics", "politeness"]},
+    "cantonese_yes": {"difficulty": 1, "tags": ["basics", "conversation_glue"]},
+    "cantonese_no": {"difficulty": 1, "tags": ["basics", "conversation_glue"]},
+    "cantonese_i_dont_understand": {"difficulty": 1, "tags": ["repair"]},
+    "cantonese_say_again": {"difficulty": 2, "tags": ["repair", "politeness"]},
+    "cantonese_speak_slowly": {"difficulty": 2, "tags": ["repair"]},
+    "cantonese_learning_cantonese": {"difficulty": 3, "tags": ["repair", "identity"]},
+    "cantonese_speak_english": {"difficulty": 3, "tags": ["repair", "question"]},
+    "cantonese_what": {"difficulty": 1, "tags": ["question", "repair"]},
+    "cantonese_where": {"difficulty": 1, "tags": ["question", "directions"]},
+    "cantonese_i_need": {"difficulty": 2, "tags": ["request"]},
+    "cantonese_goodbye": {"difficulty": 1, "tags": ["basics", "greeting"]},
+    "cantonese_where_is_bathroom": {
+        "difficulty": 3,
+        "tags": ["scenario", "directions", "survival"],
+        "prerequisites": ["cantonese_where", "cantonese_i_need"],
+    },
+    "cantonese_how_much": {"difficulty": 2, "tags": ["shopping", "question"]},
+    "cantonese_i_want": {"difficulty": 2, "tags": ["request", "shopping"]},
+    "cantonese_left": {"difficulty": 1, "tags": ["directions"]},
+    "cantonese_right": {"difficulty": 1, "tags": ["directions"]},
+    "cantonese_straight_ahead": {"difficulty": 2, "tags": ["directions"]},
+    "cantonese_where_mtr": {
+        "difficulty": 3,
+        "tags": ["scenario", "directions", "transit"],
+        "prerequisites": ["cantonese_where"],
+    },
+    "cantonese_near_here": {
+        "difficulty": 3,
+        "tags": ["directions", "question"],
+        "prerequisites": ["cantonese_where"],
+    },
+    "cantonese_how_to_get_to": {
+        "difficulty": 3,
+        "tags": ["directions", "question"],
+        "prerequisites": ["cantonese_where"],
+    },
+    "cantonese_this_one": {"difficulty": 1, "tags": ["shopping", "cafe"]},
+    "cantonese_no_ice": {"difficulty": 1, "tags": ["cafe"]},
+    "cantonese_less_sugar": {"difficulty": 1, "tags": ["cafe"]},
+    "cantonese_takeaway": {"difficulty": 1, "tags": ["cafe"]},
+    "cantonese_bill_please": {
+        "difficulty": 2,
+        "tags": ["cafe", "payment", "politeness"],
+        "prerequisites": ["cantonese_excuse_me"],
+    },
+    "cantonese_numbers_1_to_10": {"difficulty": 2, "tags": ["numbers", "shopping"]},
+    "cantonese_too_expensive": {"difficulty": 2, "tags": ["shopping", "payment"]},
+    "cantonese_pay_by_card": {
+        "difficulty": 3,
+        "tags": ["payment", "shopping"],
+        "prerequisites": ["cantonese_i_want"],
+    },
+    "cantonese_pay_cash": {
+        "difficulty": 3,
+        "tags": ["payment", "shopping"],
+        "prerequisites": ["cantonese_i_want"],
+    },
+    "cantonese_really": {"difficulty": 1, "tags": ["conversation_glue"]},
+    "cantonese_okay": {"difficulty": 1, "tags": ["conversation_glue"]},
+    "cantonese_no_problem": {"difficulty": 2, "tags": ["conversation_glue"]},
+    "cantonese_one_moment": {"difficulty": 2, "tags": ["conversation_glue"]},
+    "cantonese_what_does_this_mean": {
+        "difficulty": 3,
+        "tags": ["conversation_glue", "question", "repair"],
+        "prerequisites": ["cantonese_what", "cantonese_this_one"],
+    },
+    "cantonese_cafe_order": {
+        "difficulty": 3,
+        "tags": ["scenario", "cafe", "shopping"],
+        "prerequisites": ["cantonese_i_want", "cantonese_thank_you"],
+    },
+}
 
 CONTENT_BANK: dict[str, dict[str, object]] = {
     "cantonese_greetings": {
@@ -110,6 +193,79 @@ CONTENT_BANK: dict[str, dict[str, object]] = {
         "question": "Practice: Type the Cantonese word for 'No'. (唔係)",
         "answers": ["m4 hai6", "m4hai6", "唔係"],
     },
+    "cantonese_i_dont_understand": {
+        "category": "survival",
+        "explanation": (
+            "A useful repair phrase is '我唔明' (ngo5 m4 ming4), meaning "
+            "'I don't understand.' Use it when you need the other person to clarify."
+        ),
+        "question": (
+            "Practice: Type 'I don't understand' in Cantonese. "
+            "Answer with Jyutping (ngo5 m4 ming4) or Traditional characters (我唔明)."
+        ),
+        "answers": ["ngo5 m4 ming4", "ngo5m4ming4", "我唔明"],
+    },
+    "cantonese_say_again": {
+        "category": "survival",
+        "explanation": (
+            "To ask someone to repeat something, say '請再講一次' "
+            "(cing2 zoi3 gong2 jat1 ci3), meaning 'Please say it again.'"
+        ),
+        "question": (
+            "Practice: Type 'Please say it again' in Cantonese. "
+            "Answer with Jyutping or Traditional characters."
+        ),
+        "answers": [
+            "cing2 zoi3 gong2 jat1 ci3",
+            "cing2zoi3gong2jat1ci3",
+            "請再講一次",
+        ],
+    },
+    "cantonese_speak_slowly": {
+        "category": "survival",
+        "explanation": (
+            "To ask someone to slow down, say '講慢啲' "
+            "(gong2 maan6 di1), meaning 'Speak more slowly.'"
+        ),
+        "question": (
+            "Practice: Type 'Speak slowly' in Cantonese. "
+            "Answer with Jyutping (gong2 maan6 di1) or Traditional characters (講慢啲)."
+        ),
+        "answers": ["gong2 maan6 di1", "gong2maan6di1", "講慢啲"],
+    },
+    "cantonese_learning_cantonese": {
+        "category": "survival",
+        "explanation": (
+            "To say you are learning Cantonese, use '我學緊廣東話' "
+            "(ngo5 hok6 gan2 gwong2 dung1 waa2)."
+        ),
+        "question": (
+            "Practice: Type 'I am learning Cantonese' in Cantonese. "
+            "Answer with Jyutping or Traditional characters."
+        ),
+        "answers": [
+            "ngo5 hok6 gan2 gwong2 dung1 waa2",
+            "ngo5hok6gan2gwong2dung1waa2",
+            "我學緊廣東話",
+        ],
+    },
+    "cantonese_speak_english": {
+        "category": "survival",
+        "explanation": (
+            "To ask 'Do you speak English?', say '你識唔識講英文？' "
+            "(nei5 sik1 m4 sik1 gong2 jing1 man2)."
+        ),
+        "question": (
+            "Practice: Type 'Do you speak English?' in Cantonese. "
+            "Answer with Jyutping or Traditional characters."
+        ),
+        "answers": [
+            "nei5 sik1 m4 sik1 gong2 jing1 man2",
+            "nei5sik1m4sik1gong2jing1man2",
+            "你識唔識講英文？",
+            "你識唔識講英文",
+        ],
+    },
     "cantonese_what": {
         "category": "question",
         "explanation": (
@@ -198,6 +354,253 @@ CONTENT_BANK: dict[str, dict[str, object]] = {
             "我想",
         ],
     },
+    "cantonese_left": {
+        "category": "survival",
+        "explanation": "The direction word 'left' is '左邊' (zo2 bin1).",
+        "question": (
+            "Practice: Type 'left' in Cantonese. "
+            "Answer with Jyutping (zo2 bin1) or Traditional characters (左邊)."
+        ),
+        "answers": ["zo2 bin1", "zo2bin1", "左邊"],
+    },
+    "cantonese_right": {
+        "category": "survival",
+        "explanation": "The direction word 'right' is '右邊' (jau6 bin1).",
+        "question": (
+            "Practice: Type 'right' in Cantonese. "
+            "Answer with Jyutping (jau6 bin1) or Traditional characters (右邊)."
+        ),
+        "answers": ["jau6 bin1", "jau6bin1", "右邊"],
+    },
+    "cantonese_straight_ahead": {
+        "category": "survival",
+        "explanation": "For 'straight ahead,' say '一直行' (jat1 zik6 haang4).",
+        "question": (
+            "Practice: Type 'go straight ahead' in Cantonese. "
+            "Answer with Jyutping or Traditional characters."
+        ),
+        "answers": [
+            "jat1 zik6 haang4",
+            "jat1zik6haang4",
+            "一直行",
+        ],
+    },
+    "cantonese_where_mtr": {
+        "category": "scenario",
+        "prerequisites": ["cantonese_where"],
+        "explanation": (
+            "To ask where the MTR is, say '港鐵站喺邊度？' "
+            "(gong2 tit3 zaam6 hai2 bin1 dou6)."
+        ),
+        "question": (
+            "Scenario: Ask 'Where is the MTR station?' in Cantonese. "
+            "Answer with Jyutping or Traditional characters."
+        ),
+        "answers": [
+            "gong2 tit3 zaam6 hai2 bin1 dou6",
+            "gong2tit3zaam6hai2bin1dou6",
+            "港鐵站喺邊度？",
+            "港鐵站喺邊度",
+        ],
+    },
+    "cantonese_near_here": {
+        "category": "question",
+        "explanation": (
+            "To ask whether something is nearby, say '近唔近呢度？' "
+            "(kan5 m4 kan5 ni1 dou6)."
+        ),
+        "question": (
+            "Practice: Type 'Is it near here?' in Cantonese. "
+            "Answer with Jyutping or Traditional characters."
+        ),
+        "answers": [
+            "kan5 m4 kan5 ni1 dou6",
+            "kan5m4kan5ni1dou6",
+            "近唔近呢度？",
+            "近唔近呢度",
+        ],
+    },
+    "cantonese_how_to_get_to": {
+        "category": "question",
+        "explanation": (
+            "To ask how to get somewhere, say '點去...？' "
+            "(dim2 heoi3 ...), with the place after it."
+        ),
+        "question": (
+            "Practice: Type the Cantonese starter for 'How do I get to ...?' "
+            "Answer with Jyutping (dim2 heoi3) or Traditional characters (點去)."
+        ),
+        "answers": ["dim2 heoi3", "dim2heoi3", "點去"],
+    },
+    "cantonese_this_one": {
+        "category": "survival",
+        "explanation": "When ordering or pointing, 'this one' is '呢個' (ni1 go3).",
+        "question": (
+            "Practice: Type 'this one' in Cantonese. "
+            "Answer with Jyutping (ni1 go3) or Traditional characters (呢個)."
+        ),
+        "answers": ["ni1 go3", "ni1go3", "呢個"],
+    },
+    "cantonese_no_ice": {
+        "category": "survival",
+        "explanation": "To ask for no ice, say '走冰' (zau2 bing1).",
+        "question": (
+            "Practice: Type 'no ice' in Cantonese. "
+            "Answer with Jyutping (zau2 bing1) or Traditional characters (走冰)."
+        ),
+        "answers": ["zau2 bing1", "zau2bing1", "走冰"],
+    },
+    "cantonese_less_sugar": {
+        "category": "survival",
+        "explanation": "To ask for less sugar, say '少甜' (siu2 tim4).",
+        "question": (
+            "Practice: Type 'less sugar' in Cantonese. "
+            "Answer with Jyutping (siu2 tim4) or Traditional characters (少甜)."
+        ),
+        "answers": ["siu2 tim4", "siu2tim4", "少甜"],
+    },
+    "cantonese_takeaway": {
+        "category": "survival",
+        "explanation": "For takeaway or to-go, say '外賣' (ngoi6 maai6).",
+        "question": (
+            "Practice: Type 'takeaway' in Cantonese. "
+            "Answer with Jyutping (ngoi6 maai6) or Traditional characters (外賣)."
+        ),
+        "answers": ["ngoi6 maai6", "ngoi6maai6", "外賣"],
+    },
+    "cantonese_bill_please": {
+        "category": "survival",
+        "explanation": (
+            "To ask for the bill, say '埋單唔該' "
+            "(maai4 daan1 m4 goi1), meaning 'The bill, please.'"
+        ),
+        "question": (
+            "Practice: Type 'The bill, please' in Cantonese. "
+            "Answer with Jyutping or Traditional characters."
+        ),
+        "answers": [
+            "maai4 daan1 m4 goi1",
+            "maai4daan1m4goi1",
+            "埋單唔該",
+        ],
+    },
+    "cantonese_numbers_1_to_10": {
+        "category": "survival",
+        "explanation": (
+            "Cantonese numbers 1-10 are: 一, 二, 三, 四, 五, 六, 七, 八, 九, 十 "
+            "(jat1, ji6, saam1, sei3, ng5, luk6, cat1, baat3, gau2, sap6)."
+        ),
+        "question": (
+            "Practice: Type Cantonese numbers 1 to 10 in order. "
+            "Answer with Jyutping or Traditional characters."
+        ),
+        "answers": [
+            "jat1 ji6 saam1 sei3 ng5 luk6 cat1 baat3 gau2 sap6",
+            "jat1ji6saam1sei3ng5luk6cat1baat3gau2sap6",
+            "一二三四五六七八九十",
+        ],
+    },
+    "cantonese_too_expensive": {
+        "category": "survival",
+        "explanation": "To say something is too expensive, say '太貴' (taai3 gwai3).",
+        "question": (
+            "Practice: Type 'too expensive' in Cantonese. "
+            "Answer with Jyutping (taai3 gwai3) or Traditional characters (太貴)."
+        ),
+        "answers": ["taai3 gwai3", "taai3gwai3", "太貴"],
+    },
+    "cantonese_pay_by_card": {
+        "category": "survival",
+        "explanation": (
+            "To say you will pay by card, say '我用卡俾錢' "
+            "(ngo5 jung6 kaat1 bei2 cin2)."
+        ),
+        "question": (
+            "Practice: Type 'I will pay by card' in Cantonese. "
+            "Answer with Jyutping or Traditional characters."
+        ),
+        "answers": [
+            "ngo5 jung6 kaat1 bei2 cin2",
+            "ngo5jung6kaat1bei2cin2",
+            "我用卡俾錢",
+        ],
+    },
+    "cantonese_pay_cash": {
+        "category": "survival",
+        "explanation": (
+            "To say you will pay cash, say '我俾現金' "
+            "(ngo5 bei2 jin6 gam1)."
+        ),
+        "question": (
+            "Practice: Type 'I will pay cash' in Cantonese. "
+            "Answer with Jyutping or Traditional characters."
+        ),
+        "answers": [
+            "ngo5 bei2 jin6 gam1",
+            "ngo5bei2jin6gam1",
+            "我俾現金",
+        ],
+    },
+    "cantonese_really": {
+        "category": "survival",
+        "explanation": "A natural way to say 'Really?' is '真係？' (zan1 hai6).",
+        "question": (
+            "Practice: Type 'Really?' in Cantonese. "
+            "Answer with Jyutping (zan1 hai6) or Traditional characters (真係)."
+        ),
+        "answers": ["zan1 hai6", "zan1hai6", "真係？", "真係"],
+    },
+    "cantonese_okay": {
+        "category": "survival",
+        "explanation": "For 'Okay' or 'fine,' say '好呀' (hou2 aa3).",
+        "question": (
+            "Practice: Type 'Okay' in Cantonese. "
+            "Answer with Jyutping (hou2 aa3) or Traditional characters (好呀)."
+        ),
+        "answers": ["hou2 aa3", "hou2aa3", "好呀"],
+    },
+    "cantonese_no_problem": {
+        "category": "survival",
+        "explanation": "To say 'No problem,' use '冇問題' (mou5 man6 tai4).",
+        "question": (
+            "Practice: Type 'No problem' in Cantonese. "
+            "Answer with Jyutping or Traditional characters."
+        ),
+        "answers": [
+            "mou5 man6 tai4",
+            "mou5man6tai4",
+            "冇問題",
+        ],
+    },
+    "cantonese_one_moment": {
+        "category": "survival",
+        "explanation": (
+            "To ask for a moment, say '等陣' (dang2 zan6), meaning "
+            "'wait a moment.'"
+        ),
+        "question": (
+            "Practice: Type 'One moment' in Cantonese. "
+            "Answer with Jyutping (dang2 zan6) or Traditional characters (等陣)."
+        ),
+        "answers": ["dang2 zan6", "dang2zan6", "等陣"],
+    },
+    "cantonese_what_does_this_mean": {
+        "category": "question",
+        "explanation": (
+            "To ask what something means, say '呢個係咩意思？' "
+            "(ni1 go3 hai6 me1 ji3 si1)."
+        ),
+        "question": (
+            "Practice: Type 'What does this mean?' in Cantonese. "
+            "Answer with Jyutping or Traditional characters."
+        ),
+        "answers": [
+            "ni1 go3 hai6 me1 ji3 si1",
+            "ni1go3hai6me1ji3si1",
+            "呢個係咩意思？",
+            "呢個係咩意思",
+        ],
+    },
     "cantonese_cafe_order": {
         "category": "scenario",
         "prerequisites": [
@@ -231,7 +634,34 @@ def topic_category(topic: str) -> str:
     return str(cat) if cat is not None else "general"
 
 
+def topic_difficulty(topic: str) -> int:
+    metadata = CURRICULUM_METADATA.get(topic) or {}
+    try:
+        difficulty = int(metadata.get("difficulty", 1))
+    except (TypeError, ValueError):
+        difficulty = 1
+    return max(1, min(5, difficulty))
+
+
+def topic_tags(topic: str) -> list[str]:
+    metadata = CURRICULUM_METADATA.get(topic) or {}
+    raw_tags = metadata.get("tags")
+    if not isinstance(raw_tags, list):
+        return []
+    tags: list[str] = []
+    for raw in raw_tags:
+        tag = str(raw).strip()
+        if tag and tag not in tags:
+            tags.append(tag)
+    return tags
+
+
 def topic_prerequisites(topic: str) -> list[str]:
+    metadata = CURRICULUM_METADATA.get(topic) or {}
+    metadata_prereqs = metadata.get("prerequisites")
+    if isinstance(metadata_prereqs, list):
+        return [str(x) for x in metadata_prereqs if str(x).strip()]
+
     entry = CONTENT_BANK.get(topic) or {}
     prereqs = entry.get("prerequisites")
     if isinstance(prereqs, list):

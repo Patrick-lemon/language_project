@@ -4,10 +4,13 @@ from typing import Optional, Tuple
 from learner_model import LearnerModel
 from memory import Memory
 from tools.content_bank import (
+    PREREQUISITE_MASTERY,
     SCENARIO_PREREQUISITE_MASTERY,
     list_topics,
     topic_category,
+    topic_difficulty,
     topic_prerequisites,
+    topic_tags,
 )
 
 
@@ -42,14 +45,31 @@ class Planner:
             return candidates, None
         return candidates, None
 
-    def _scenario_unlocked(self, learner: LearnerModel, topic: str) -> bool:
+    def _max_difficulty(self, learner: LearnerModel, memory: Memory) -> int:
+        stable_topics = [
+            topic
+            for topic in list_topics()
+            if learner.get_mastery(topic) >= PREREQUISITE_MASTERY
+            or memory.topic_accuracy(topic) >= 0.75
+        ]
+        if learner.confidence < 0.45:
+            return 1
+        if len(stable_topics) >= 7:
+            return 3
+        if len(stable_topics) >= 3:
+            return 2
+        return 1
+
+    def _topic_unlocked(self, learner: LearnerModel, memory: Memory, topic: str) -> bool:
         prereqs = topic_prerequisites(topic)
-        if not prereqs:
-            return True
-        # Gate scenario tasks until foundation topics are reasonably stable.
-        return all(
-            learner.get_mastery(t) >= SCENARIO_PREREQUISITE_MASTERY for t in prereqs
+        required_mastery = (
+            SCENARIO_PREREQUISITE_MASTERY
+            if topic_category(topic) == "scenario"
+            else PREREQUISITE_MASTERY
         )
+        if prereqs and not all(learner.get_mastery(t) >= required_mastery for t in prereqs):
+            return False
+        return topic_difficulty(topic) <= self._max_difficulty(learner, memory)
 
     def choose_plan(self, learner: LearnerModel, memory: Memory) -> Plan:
         topics = list_topics()
@@ -76,23 +96,28 @@ class Planner:
                     reason="Learner made an error; practice this topic again.",
                 )
 
-        if learner.review_queue:
-            topic = learner.review_queue[0]
+        due_reviews = memory.due_review_topics(list(learner.review_queue))
+        if due_reviews:
+            topic = due_reviews[0]
             accuracy = memory.topic_accuracy(topic)
             return Plan(
                 action="review",
                 topic=topic,
-                reason=f"Topic stays in the learner's review queue (accuracy={accuracy:.2f}).",
+                reason=(
+                    "Topic is due for spaced review "
+                    f"(accuracy={accuracy:.2f}, turn={memory.current_turn()})."
+                ),
             )
 
         # Adaptation: avoid repeating very recent topics and avoid repeating the same
-        # content category back-to-back when possible.
+        # content category/tag back-to-back when possible.
         recent_topics = set(memory.recent_practice_topics(n=2))
         recent_categories = {topic_category(t) for t in recent_topics}
+        recent_tags = set()
+        for topic in recent_topics:
+            recent_tags.update(topic_tags(topic))
         unlocked_topics = [
-            t
-            for t in topics
-            if topic_category(t) != "scenario" or self._scenario_unlocked(learner, t)
+            t for t in topics if self._topic_unlocked(learner, memory, t)
         ]
         if not unlocked_topics:
             unlocked_topics = topics
@@ -100,7 +125,9 @@ class Planner:
         candidates = [
             t
             for t in unlocked_topics
-            if t not in recent_topics and topic_category(t) not in recent_categories
+            if t not in recent_topics
+            and topic_category(t) not in recent_categories
+            and not (set(topic_tags(t)) & recent_tags)
         ]
         if not candidates:
             candidates = [

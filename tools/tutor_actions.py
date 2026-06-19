@@ -80,8 +80,14 @@ def update_review_status(learner: LearnerModel, memory: Memory, topic: str) -> s
     accuracy = memory.topic_accuracy(topic)
     if accuracy < 0.7:
         learner.add_to_review(topic)
-        return f"[ReviewSkill] {topic} remains in review queue (accuracy={accuracy:.2f})."
+        delay = 2 if accuracy < 0.4 else 4
+        due_turn = memory.schedule_review(topic, delay)
+        return (
+            f"[ReviewSkill] {topic} remains in review queue "
+            f"(accuracy={accuracy:.2f}, due_turn={due_turn})."
+        )
 
     if topic in learner.review_queue:
         learner.review_queue.remove(topic)
+    memory.clear_review_schedule(topic)
     return f"[ReviewSkill] {topic} removed from review queue (accuracy={accuracy:.2f})."

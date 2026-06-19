@@ -2,11 +2,28 @@ from dataclasses import dataclass, field
 from typing import Any, Optional
 
 
+def _int_map(value: object) -> dict[str, int]:
+    if not isinstance(value, dict):
+        return {}
+    out: dict[str, int] = {}
+    for raw_key, raw_score in value.items():
+        key = str(raw_key).strip()
+        if not key:
+            continue
+        try:
+            score = int(raw_score)
+        except (TypeError, ValueError):
+            continue
+        out[key] = max(0, score)
+    return out
+
+
 @dataclass
 class Memory:
     interaction_log: list[dict[str, object]] = field(default_factory=list)
     topic_history: dict[str, list[bool]] = field(default_factory=dict)
     completed_tasks: list[str] = field(default_factory=list)
+    review_due_turn: dict[str, int] = field(default_factory=dict)
 
     def remember(self, event: dict[str, object]) -> None:
         self.interaction_log.append(event)
@@ -14,11 +31,31 @@ class Memory:
     def update_topic_result(self, topic: str, correct: bool) -> None:
         self.topic_history.setdefault(topic, []).append(correct)
 
+    def current_turn(self) -> int:
+        return len(self.practice_attempts())
+
     def topic_accuracy(self, topic: str) -> float:
         attempts = self.topic_history.get(topic, [])
         if not attempts:
             return 0.0
         return sum(1 for item in attempts if item) / len(attempts)
+
+    def schedule_review(self, topic: str, delay_turns: int) -> int:
+        due_turn = self.current_turn() + max(0, delay_turns)
+        self.review_due_turn[topic] = due_turn
+        return due_turn
+
+    def clear_review_schedule(self, topic: str) -> None:
+        self.review_due_turn.pop(topic, None)
+
+    def review_is_due(self, topic: str) -> bool:
+        due_turn = self.review_due_turn.get(topic)
+        if due_turn is None:
+            return True
+        return self.current_turn() >= due_turn
+
+    def due_review_topics(self, topics: list[str]) -> list[str]:
+        return [topic for topic in topics if self.review_is_due(topic)]
 
     def recent_events(self, n: int = 5) -> list[dict[str, object]]:
         return self.interaction_log[-n:]
@@ -54,6 +91,7 @@ class Memory:
                 for topic, attempts in self.topic_history.items()
             },
             "completed_tasks": list(self.completed_tasks),
+            "review_due_turn": dict(self.review_due_turn),
         }
 
     @classmethod
@@ -89,4 +127,5 @@ class Memory:
             interaction_log=interaction_log,
             topic_history=topic_history,
             completed_tasks=completed_tasks,
+            review_due_turn=_int_map(data.get("review_due_turn")),
         )

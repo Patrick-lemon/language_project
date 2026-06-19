@@ -76,6 +76,34 @@ class VoiceTutorTests(unittest.TestCase):
 
         self.assertEqual(payload["lesson"]["stage"], "roleplay")
 
+    def test_repair_phrase_voice_lesson_accepts_spoken_variant(self) -> None:
+        with patch("voice_tutor.save_session_state"):
+            session = VoiceTutorSession(
+                session_id="test",
+                learner=LearnerModel(name="Voice"),
+                memory=Memory(),
+                active_lesson=ActiveLesson(
+                    topic="cantonese_i_dont_understand",
+                    action="explain",
+                ),
+            )
+            payload = session.process_learner_turn("ngo5 m4 ming4 aa3")
+
+        self.assertEqual(payload["lesson"]["stage"], "roleplay")
+        self.assertIn("core line", payload["messages"][-1]["text"].lower())
+
+    def test_short_expanded_voice_lesson_accepts_fuller_spoken_variant(self) -> None:
+        with patch("voice_tutor.save_session_state"):
+            session = VoiceTutorSession(
+                session_id="test",
+                learner=LearnerModel(name="Voice"),
+                memory=Memory(),
+                active_lesson=ActiveLesson(topic="cantonese_this_one", action="explain"),
+            )
+            payload = session.process_learner_turn("ni1 go3 aa3")
+
+        self.assertEqual(payload["lesson"]["stage"], "roleplay")
+
     def test_next_command_moves_to_next_lesson(self) -> None:
         with patch("voice_tutor.save_session_state"):
             session = VoiceTutorSession(
