@@ -111,6 +111,20 @@ class TutorSystemTests(unittest.TestCase):
         unlocked_plan = Planner().choose_plan(learner, memory)
         self.assertEqual(unlocked_plan.topic, "cantonese_where_mtr")
 
+    def test_planner_blends_electives_with_core_roadmap(self) -> None:
+        learner = LearnerModel(name="Student")
+        learner.custom_focus_topics = ["cantonese_where"]
+        memory = Memory()
+
+        elective_plan = Planner().choose_plan(learner, memory)
+        self.assertEqual(elective_plan.topic, "cantonese_where")
+        self.assertIn("elective", elective_plan.reason)
+
+        learner.mastery_by_topic["cantonese_where"] = 0.95
+        core_plan = Planner().choose_plan(learner, memory)
+        self.assertNotEqual(core_plan.topic, "cantonese_where")
+        self.assertIn("core roadmap", core_plan.reason)
+
     def test_scenario_progress_is_ascii_safe(self) -> None:
         report = format_scenario_progress(LearnerModel(name="Student"))
         self.assertTrue(report.isascii())

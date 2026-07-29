@@ -5,6 +5,7 @@ const state = {
   config: null,
   lastPayloadMessages: [],
   voices: [],
+  selectedTopics: new Set(),
 };
 
 const els = {
@@ -172,6 +173,7 @@ function updateLessonBoard(payload) {
   els.readyButton.disabled = !(lesson && lesson.can_advance);
   els.readyButton.textContent = lesson?.advance_label || "Show Demo Again";
   renderQuickReplies(lesson);
+  syncSelectedTopics(payload.learner?.custom_focus_topics || []);
 }
 
 function buildSpeechQueue(message) {
@@ -226,8 +228,79 @@ function applyPayload(payload) {
 }
 
 function updateFocusFieldVisibility() {
-  const isCustom = els.focusMode.value === "custom";
-  els.customTopicsField.style.display = isCustom ? "grid" : "none";
+  els.customTopicsField.style.display = "grid";
+}
+
+function topicCategoryLabel(value) {
+  const labels = {
+    survival: "Survival",
+    question: "Questions",
+    scenario: "Scenarios",
+  };
+  return labels[value] || String(value || "General").replaceAll("_", " ");
+}
+
+function renderTopicPicker(topics) {
+  els.customTopics.innerHTML = "";
+  const groups = new Map();
+  topics.forEach((topic) => {
+    const category = topic.category || "general";
+    if (!groups.has(category)) {
+      groups.set(category, []);
+    }
+    groups.get(category).push(topic);
+  });
+
+  groups.forEach((items, category) => {
+    const group = document.createElement("section");
+    group.className = "topic-group";
+
+    const heading = document.createElement("h3");
+    heading.textContent = topicCategoryLabel(category);
+    group.appendChild(heading);
+
+    items.forEach((topic) => {
+      const label = document.createElement("label");
+      label.className = "topic-option";
+
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.value = topic.id;
+      input.addEventListener("change", () => {
+        if (input.checked) {
+          state.selectedTopics.add(topic.id);
+        } else {
+          state.selectedTopics.delete(topic.id);
+        }
+      });
+
+      const text = document.createElement("span");
+      const tags = Array.isArray(topic.tags) ? topic.tags.slice(0, 2).join(", ") : "";
+      text.textContent = tags
+        ? `${topic.label} · ${topic.english} · ${tags}`
+        : `${topic.label} · ${topic.english}`;
+
+      label.appendChild(input);
+      label.appendChild(text);
+      group.appendChild(label);
+    });
+
+    els.customTopics.appendChild(group);
+  });
+}
+
+function selectedCustomTopics() {
+  return Array.from(state.selectedTopics);
+}
+
+function syncSelectedTopics(topics) {
+  const next = new Set(Array.isArray(topics) ? topics : []);
+  state.selectedTopics = next;
+  els.customTopics
+    .querySelectorAll('input[type="checkbox"]')
+    .forEach((input) => {
+      input.checked = next.has(input.value);
+    });
 }
 
 function speechSupport() {
@@ -294,7 +367,7 @@ async function startSession() {
   const payload = await requestJson("/api/session/start", {
     learner_name: els.learnerName.value.trim() || "Student",
     focus_mode: els.focusMode.value,
-    custom_topics: els.customTopics.value.trim(),
+    custom_topics: selectedCustomTopics(),
   });
   state.sessionId = payload.session_id;
   applyPayload(payload);
@@ -324,7 +397,7 @@ async function updateFocus() {
   const payload = await requestJson("/api/session/focus", {
     session_id: state.sessionId,
     focus_mode: els.focusMode.value,
-    custom_topics: els.customTopics.value.trim(),
+    custom_topics: selectedCustomTopics(),
   });
   applyPayload(payload);
 }
@@ -391,10 +464,11 @@ async function init() {
   config.focus_modes.forEach((mode) => {
     const option = document.createElement("option");
     option.value = mode;
-    option.textContent = mode;
+    option.textContent = mode === "custom" ? "balanced + electives" : mode;
     els.focusMode.appendChild(option);
   });
   els.focusMode.value = "balanced";
+  renderTopicPicker(Array.isArray(config.topics) ? config.topics : []);
 
   config.speech_locales.forEach((locale) => {
     const option = document.createElement("option");

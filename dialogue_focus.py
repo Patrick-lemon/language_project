@@ -107,8 +107,11 @@ def run_focus_menu(learner: LearnerModel) -> None:
 
 
 def focus_summary(learner: LearnerModel) -> str:
-    if learner.learning_focus == "custom" and learner.custom_focus_topics:
-        return f"custom -> {', '.join(learner.custom_focus_topics)}"
+    topics = list(learner.custom_focus_topics)
+    if learner.learning_focus == "custom" and topics:
+        return f"balanced + electives -> {', '.join(topics)}"
     if learner.learning_focus == "custom":
-        return "custom (no topics yet - use `topics id1,id2`)"
+        return "balanced + electives (choose one or more topics)"
+    if topics:
+        return f"{learner.learning_focus} + electives -> {', '.join(topics)}"
     return learner.learning_focus

@@ -27,16 +27,7 @@ class Planner:
     ) -> Tuple[list[str], Optional[str]]:
         """Narrow candidate topics when the learner set a preference; never return empty."""
         mode = (getattr(learner, "learning_focus", None) or "balanced").strip().lower()
-        if mode == "balanced":
-            return candidates, None
-        if mode == "custom":
-            keys = list(getattr(learner, "custom_focus_topics", None) or [])
-            if not keys:
-                return candidates, None
-            keyset = set(keys)
-            filt = [t for t in candidates if t in keyset]
-            if filt:
-                return filt, "Learner-requested topic list."
+        if mode in ("balanced", "custom"):
             return candidates, None
         if mode in ("survival", "question", "scenario"):
             filt = [t for t in candidates if topic_category(t) == mode]
@@ -44,6 +35,28 @@ class Planner:
                 return filt, f"Learner prefers {mode} lessons."
             return candidates, None
         return candidates, None
+
+    def _choose_topic_with_electives(
+        self, learner: LearnerModel, candidates: list[str]
+    ) -> Tuple[str, Optional[str]]:
+        """Blend learner-picked electives into the roadmap without ignoring weak basics."""
+        roadmap_topic = min(candidates, key=lambda t: learner.get_mastery(t))
+        elective_keys = list(getattr(learner, "custom_focus_topics", None) or [])
+        if not elective_keys:
+            return roadmap_topic, None
+
+        keyset = set(elective_keys)
+        elective_candidates = [t for t in candidates if t in keyset]
+        if not elective_candidates:
+            return roadmap_topic, "Learner electives are saved; locked or recent electives will come up later."
+
+        elective_topic = min(elective_candidates, key=lambda t: learner.get_mastery(t))
+        elective_score = learner.get_mastery(elective_topic)
+        roadmap_score = learner.get_mastery(roadmap_topic)
+
+        if elective_score < 0.8 or elective_score <= roadmap_score + 0.1:
+            return elective_topic, "Learner-chosen elective woven into the roadmap."
+        return roadmap_topic, "Learner electives are active; core roadmap needs this turn."
 
     def _max_difficulty(self, learner: LearnerModel, memory: Memory) -> int:
         stable_topics = [
@@ -136,13 +149,16 @@ class Planner:
 
         candidates, focus_note = self._apply_learner_focus(learner, candidates)
 
-        weakest_topic = min(candidates, key=lambda t: learner.get_mastery(t))
+        weakest_topic, elective_note = self._choose_topic_with_electives(
+            learner, candidates
+        )
         weakest_score = learner.get_mastery(weakest_topic)
         attempts = memory.topic_history.get(weakest_topic, [])
         accuracy = memory.topic_accuracy(weakest_topic)
 
         def with_focus(reason: str) -> str:
-            return f"{reason} {focus_note}".strip() if focus_note else reason
+            notes = [note for note in (focus_note, elective_note) if note]
+            return f"{reason} {' '.join(notes)}".strip() if notes else reason
 
         # Adaptation: use both confidence and topic accuracy to decide teach vs practice.
         if learner.confidence < 0.45:

@@ -11,7 +11,14 @@ from learner_model import LearnerModel
 from memory import Memory
 from planner import Planner
 from session_store import load_session_state, save_session_state
-from tools.content_bank import CONTENT_BANK, list_topics, topic_category
+from tools.content_bank import (
+    CONTENT_BANK,
+    list_topics,
+    topic_category,
+    topic_difficulty,
+    topic_prerequisites,
+    topic_tags,
+)
 from tools.llm import (
     describe_runtime_mode,
     evaluate_answer,
@@ -40,7 +47,28 @@ def _parse_custom_topics(raw_topics: str | list[str] | None) -> list[str]:
     return out
 
 
+def _topic_catalog_item(topic: str) -> dict[str, object]:
+    target = _target_bundle(topic)
+    return {
+        "id": topic,
+        "label": target["label"],
+        "category": target["category"],
+        "difficulty": topic_difficulty(topic),
+        "tags": topic_tags(topic),
+        "prerequisites": topic_prerequisites(topic),
+        "english": target["spoken_english"] or target["english"],
+    }
+
+
 def _extract_english_gloss(question: str, topic: str) -> str:
+    typed_prompt = re.search(
+        r"(?:Practice|Scenario):.*?Type '(.+?)' in Cantonese",
+        question,
+        flags=re.IGNORECASE,
+    )
+    if typed_prompt:
+        return typed_prompt.group(1).strip()
+
     matches = re.findall(r"'([^']+)'", question)
     for match in matches:
         text = match.strip()
@@ -945,6 +973,8 @@ class VoiceTutorSession:
                 "review_queue": list(snapshot["review_queue"]),
                 "weak_grammar_points": list(snapshot["weak_grammar_points"]),
                 "mastery_by_topic": dict(snapshot["mastery_by_topic"]),
+                "learning_focus": snapshot["learning_focus"],
+                "custom_focus_topics": list(snapshot["custom_focus_topics"]),
             },
         }
 
@@ -1279,10 +1309,7 @@ class VoiceTutorSession:
         if normalized not in VALID_FOCUS_MODES:
             normalized = "balanced"
         self.learner.learning_focus = normalized
-        if normalized == "custom":
-            self.learner.custom_focus_topics = _parse_custom_topics(custom_topics)
-        else:
-            self.learner.custom_focus_topics = []
+        self.learner.custom_focus_topics = _parse_custom_topics(custom_topics)
 
         self.active_lesson = None
         summary = focus_summary(self.learner)
@@ -1303,7 +1330,7 @@ class VoiceTutorSessionManager:
     def config_payload(self) -> dict[str, object]:
         return {
             "runtime_mode": describe_runtime_mode(),
-            "topics": list_topics(),
+            "topics": [_topic_catalog_item(topic) for topic in list_topics()],
             "focus_modes": list(VALID_FOCUS_MODES),
             "speech_locales": [
                 {"label": "Cantonese (Hong Kong)", "value": "zh-HK"},

@@ -181,6 +181,49 @@ textarea {
   resize: vertical;
 }
 
+.topic-picker {
+  display: grid;
+  gap: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(31, 39, 35, 0.12);
+  background: rgba(255, 255, 255, 0.56);
+}
+
+.topic-group {
+  display: grid;
+  gap: 8px;
+}
+
+.topic-group h3 {
+  margin: 0;
+  color: var(--accent);
+  font-size: 0.86rem;
+}
+
+.topic-option {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 8px;
+  align-items: start;
+  padding: 9px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(31, 39, 35, 0.08);
+  color: var(--ink);
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+
+.topic-option input {
+  width: 18px;
+  height: 18px;
+  margin: 1px 0 0;
+  accent-color: var(--accent);
+}
+
 .primary-button,
 .secondary-button,
 .ghost-button,

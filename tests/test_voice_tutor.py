@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 from learner_model import LearnerModel
 from memory import Memory
-from voice_tutor import ActiveLesson, VoiceTutorSession
+from voice_tutor import ActiveLesson, VoiceTutorSession, VoiceTutorSessionManager
 
 
 class VoiceTutorTests(unittest.TestCase):
@@ -24,6 +24,33 @@ class VoiceTutorTests(unittest.TestCase):
         self.assertIn("How I'd say it:", payload["messages"][-1]["text"])
         speech_segments = payload["messages"][-1]["speech_segments"]
         self.assertTrue(any(segment["lang"] == "zh-HK" for segment in speech_segments))
+
+    def test_config_exposes_topic_catalog_for_elective_picker(self) -> None:
+        config = VoiceTutorSessionManager().config_payload()
+
+        self.assertIsInstance(config["topics"], list)
+        first_topic = config["topics"][0]
+        self.assertIn("id", first_topic)
+        self.assertIn("label", first_topic)
+        self.assertIn("category", first_topic)
+        self.assertIn("difficulty", first_topic)
+        repair_topic = next(
+            topic for topic in config["topics"] if topic["id"] == "cantonese_i_dont_understand"
+        )
+        self.assertEqual(repair_topic["english"], "I don't understand")
+
+    def test_update_focus_saves_electives_with_balanced_roadmap(self) -> None:
+        with patch("voice_tutor.save_session_state"):
+            session = VoiceTutorSession(
+                session_id="test",
+                learner=LearnerModel(name="Voice"),
+                memory=Memory(),
+            )
+            payload = session.update_focus("balanced", ["cantonese_where"])
+
+        self.assertEqual(payload["learner"]["learning_focus"], "balanced")
+        self.assertEqual(payload["learner"]["custom_focus_topics"], ["cantonese_where"])
+        self.assertIn("electives", payload["focus"])
 
     def test_repeat_command_replays_teacher_demo(self) -> None:
         with patch("voice_tutor.save_session_state"):
