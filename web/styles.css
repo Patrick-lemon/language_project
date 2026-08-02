@@ -78,12 +78,36 @@ body {
   animation: fade-up 0.6s ease;
 }
 
+.hero-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
 .eyebrow {
-  margin: 0 0 10px;
+  margin: 0;
   color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.18em;
   font-size: 0.72rem;
+}
+
+.language-toggle {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 6px 14px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.language-toggle:hover {
+  background: var(--accent-warm);
+  transform: translateY(-1px);
 }
 
 .hero-card h1 {

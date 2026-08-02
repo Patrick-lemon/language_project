@@ -524,6 +524,31 @@ els.messageInput.addEventListener("keydown", (event) => {
   }
 });
 
+// Initialize language
+console.log("Initializing language system...");
+console.log("translations object exists:", typeof translations !== 'undefined');
+console.log("t function exists:", typeof t !== 'undefined');
+applyTranslations(getLanguage());
+console.log("Applied initial translations for:", getLanguage());
+
+const langToggleBtn = document.querySelector("#languageToggle");
+console.log("Language toggle button found:", langToggleBtn ? "YES" : "NO");
+
+if (langToggleBtn) {
+  langToggleBtn.addEventListener("click", () => {
+    console.log("Language toggle button clicked!");
+    const currentLang = getLanguage();
+    console.log("Current language:", currentLang);
+    const newLang = currentLang === 'en' ? 'zh' : 'en';
+    console.log("Switching to:", newLang);
+    setLanguage(newLang);
+    console.log("Language changed to:", getLanguage());
+  });
+  console.log("Event listener attached to language toggle button");
+} else {
+  console.error("Language toggle button NOT FOUND");
+}
+
 init().catch((error) => {
   setRuntimeMessage(error.message);
   showTranscriptNotice(
