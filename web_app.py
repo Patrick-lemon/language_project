@@ -14,8 +14,8 @@ from runtime_support import configure_text_output, load_dotenv
 from voice_tutor import VoiceTutorSessionManager
 
 
-HOST = "127.0.0.1"
-PORT = int(os.environ.get("TUTOR_WEB_PORT", "8765"))
+HOST = "0.0.0.0"
+PORT = int(os.environ.get("TUTOR_WEB_PORT", "5000"))
 WEB_DIR = Path(__file__).resolve().parent / "web"
 SESSION_MANAGER = VoiceTutorSessionManager()
 
