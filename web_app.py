@@ -14,8 +14,8 @@ from runtime_support import configure_text_output, load_dotenv
 from voice_tutor import VoiceTutorSessionManager
 
 
-HOST = "0.0.0.0"
-PORT = int(os.environ.get("TUTOR_WEB_PORT", "5000"))
+HOST = "0.0.0.0"  # Listen on all interfaces for Render
+PORT = int(os.environ.get("PORT", "5000"))
 WEB_DIR = Path(__file__).resolve().parent / "web"
 SESSION_MANAGER = VoiceTutorSessionManager()
 
@@ -33,6 +33,9 @@ class TutorWebHandler(BaseHTTPRequestHandler):
             return
         if path == "/styles.css":
             self._serve_file(WEB_DIR / "styles.css")
+            return
+        if path == "/translations.js":
+            self._serve_file(WEB_DIR / "translations.js")
             return
         if path == "/static/app.js":
             self._serve_file(WEB_DIR / "app.js")
